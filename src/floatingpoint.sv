@@ -7,11 +7,11 @@ package floatingpoint;
     } float;
 
     function automatic float ShortrealToFloat(input shortreal sr);
-        return $cast(sr, float);
+        return $shortrealtobits(sr);
     endfunction
 
     function automatic shortreal FloatToShortreal(input float f);
-        return $cast(f, shortreal);
+        return $bitstoshortreal(f);
     endfunction
 
     function automatic logic IsZero(input float num);
