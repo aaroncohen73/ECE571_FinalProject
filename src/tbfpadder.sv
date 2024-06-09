@@ -1,6 +1,6 @@
 module top;
 
-    parameter TEST_CYCLES = 1;
+    parameter TEST_CYCLES = 10;
 
     import FloatingPoint::Float;
 
@@ -91,11 +91,12 @@ module top;
         sr1 = In1.ToShortreal();
         sr2 = In2.ToShortreal();
 
+        @(negedge Clock);
         Op1 = In1.ToBits();
         Op2 = In2.ToBits();
         InputValid = 1;
         cov.sample();
-        @(posedge Clock);
+        @(negedge Clock);
         InputValid = 0;
 
         while (~ResultValid) @(posedge Clock);
