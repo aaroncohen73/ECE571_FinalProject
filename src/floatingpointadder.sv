@@ -39,7 +39,7 @@ if(Reset)
     signA <=0;
     signB <=0;
    end
-   else if(InputValid && ResultValid)
+   else if(InputValid)
    begin 
     mant1 <= Op1.mantissa;
     mant2 <= Op2.mantissa;
@@ -88,7 +88,7 @@ assign mantBSel = ~mantASel;//
 AddSub8Bit #(24) mantALU(firstMant,{1'b1, mantB}, {expNoDif, mantA},mantWrong , , , normDir, ~subCtrl);//
 
 //Ensure correct "sign" of mantissa result
-always begin //
+always_comb begin //
 if (signA!=signB && expNoDif && mantWrong)
 	signMant = ~firstMant+1'b1;
 else
