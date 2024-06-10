@@ -64,8 +64,6 @@ if(Reset)
     end
 end
 
-<<<<<<< HEAD
-=======
 `ifdef DEBUG_ADDER
 always @(posedge InputValid)
 begin
@@ -95,7 +93,6 @@ begin
     $strobe("\tOUTPUT: Sign=%1b, Exponent=%0d, Mantissa=%23b", Result.sign, Result.exponent, Result.mantissa);
 end
 `endif
->>>>>>> e1b3add866726ef40cdd4697e778b7ebd56e5b93
 
 //Selects mantissa placement based on exponent ALU output. Doesn't account for exponents being the same
 n2to1Mux #(23) mantAmux(mantASel, mant1, mant2, smallMant);//
@@ -151,11 +148,7 @@ FloatRounding  roundingLogic(normMant,currExp,shiftRound,sticky,Clock,roundMant,
 assign roundingMant = valid;
 assign roundingExp = valid;
 assign doneRounding = valid;
-<<<<<<< HEAD
 assign ResultValid = ~valid;
-=======
-assign ResultValid = valid;
->>>>>>> 90408a48ace42fbd094014428a90001279443047
 assign Result.sign = signOut;
 assign Result.exponent = roundExp;
 assign Result.mantissa = roundMant;
