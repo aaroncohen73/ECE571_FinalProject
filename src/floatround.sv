@@ -21,13 +21,21 @@ output bit valid;
         end
       else
       begin
-      valid <= &normMant ? 0:1;
       if (normMant[0] && R)
+        begin
+        valid <= 1;
         roundMant <= normMant+1'b1; // Round up 
+        end
       else if(R&&S)
+        begin
+          valid <= 1;
           roundMant <= normMant+1'b1; // Round up 
+        end
       else
+        begin
+        valid <= 0;
         roundMant <= normMant; // Round down
+        end
       roundExp <= normExp;
       end
     end

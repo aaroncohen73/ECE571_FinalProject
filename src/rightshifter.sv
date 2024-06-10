@@ -10,8 +10,7 @@ output logic R;
 logic [exp-1:0] shiftAmount;
 int i;
 
-always_comb
-    shiftAmount = (index^sign) + sign;
+    assign shiftAmount = (index^{8{sign}}) + sign;
 
 always_comb
   begin
@@ -25,6 +24,6 @@ always_comb
       else
         S = 0;
     end
-  {shiftedMant,R} = {1'b1,mantValue} >> shiftAmount;
+  {shiftedMant,R} = {1'b1,mantValue} >> shiftAmount - 1'b1;
   end
 endmodule
