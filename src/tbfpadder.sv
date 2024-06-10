@@ -1,3 +1,4 @@
+`define DEBUG
 module top;
 
     parameter TEST_CYCLES = 1;
@@ -106,7 +107,6 @@ module top;
         KGD_Res = Float::FromShortreal(sr1 + sr2);
 
         `ifdef DEBUG
-            $display("-----------------------------------------------------------");
             $display("\tExpected output: %f %s\n\tActual output: %f %s",
                         KGD_Res.ToShortreal(), KGD_Res.FloatComponents(),
                         DUT_Res.ToShortreal(), DUT_Res.FloatComponents());
@@ -115,7 +115,6 @@ module top;
                         sr2, In2.FloatComponents());
         `endif
 
-        /*
         assert(ResultValid && Float::CompareIncludeNaN(KGD_Res, DUT_Res))
         else
             begin
@@ -128,7 +127,6 @@ module top;
                         sr1, In1.FloatComponents(),
                         sr2, In2.FloatComponents());
             end
-        */
 
         cov.sample();
     endtask

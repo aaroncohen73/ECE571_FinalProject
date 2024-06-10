@@ -80,10 +80,18 @@ begin
     $strobe("\tSTEP 2: Operand 1 sign (signA)=%1b, prepended mantissa ({expNoDif,mantA})=%24b\n", signA, {expNoDif, mantA},
             "\t\tOperand 2 sign (signB)=%1b, prepended+shifted mantissa ({1'b1,mantB})=%24b\n", signB, {1'b1, mantB},
             "\t\tResult sign (signOut)=%1b, mantissa (signMant)=%24b", signOut, signMant);
-    $strobe("\tSTEP 3: Non-normalized mantissa (preMant)=%25b, exponent (preExp)=%0d\n", preMant, preExp,
-            "\t\tNormalized mantissa (normMant)=%24b, exponent (normExp)=%0d\n", normMant, normExp,
-            "\t\tFFO Result (Index)=%0d",Index);
-    @(posedge ResultValid);
+
+    do
+        begin
+        $strobe("\tRounding block output (roundingMant)=%1b",roundingMant);
+        $strobe("\tSTEP 3: Non-normalized mantissa (preMant)=%25b, exponent (preExp)=%0d\n", preMant, preExp,
+                "\t\tNormalized mantissa (normMant)=%24b, exponent (normExp)=%0d\n", normMant, normExp,
+                "\t\tFFO Result (Index)=%0d",Index);
+        $strobe("\tSTEP 4: Rounding block input: mantissa (normMant)=%24b, exponent (currExp)=%0d\n", normMant, currExp,
+                "\t\tRounding block output: mantissa (roundMant)=%24b, exponent (roundExp)=%0d", roundMant, roundExp);
+        @(posedge Clock);
+        end
+    while (~ResultValid);
     $strobe("\tOUTPUT: Sign=%1b, Exponent=%0d, Mantissa=%23b", Result.sign, Result.exponent, Result.mantissa);
 end
 `endif
@@ -143,7 +151,11 @@ FloatRounding  roundingLogic(normMant,currExp,shiftRound,sticky,Clock,roundMant,
 assign roundingMant = valid;
 assign roundingExp = valid;
 assign doneRounding = valid;
+<<<<<<< HEAD
 assign ResultValid = ~valid;
+=======
+assign ResultValid = valid;
+>>>>>>> 90408a48ace42fbd094014428a90001279443047
 assign Result.sign = signOut;
 assign Result.exponent = roundExp;
 assign Result.mantissa = roundMant;
