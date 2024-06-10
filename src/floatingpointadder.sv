@@ -118,7 +118,7 @@ FloatRounding  roundingLogic(normMant,currExp,shiftRound,sticky,Clock,roundMant,
 assign roundingMant = valid;
 assign roundingExp = valid;
 assign doneRounding = valid;
-assign ResultValid = valid;
+assign ResultValid = ~valid;
 assign Result.sign = signOut;
 assign Result.exponent = roundExp;
 assign Result.mantissa = roundMant;
