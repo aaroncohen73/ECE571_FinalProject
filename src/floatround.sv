@@ -1,4 +1,5 @@
-module FloatRounding(normMant,normExp,R,S,Clock,roundMant,roundExp,valid,Reset);
+module
+FloatRounding(normMant,normExp,R,S,Clock,roundMant,roundExp,valid,Reset,ResultValid);
 parameter n = 24;
 parameter exp = 8;
 input logic [n-1:0] normMant;
@@ -7,13 +8,14 @@ input logic R;
 input logic Reset;
 input logic S;
 input logic Clock;
+input logic ResultValid;
 output logic [n-1:0] roundMant;
 output logic [exp-1:0]  roundExp;
-output bit valid;
+output logic valid;
 
   always_ff @(posedge Clock)
     begin
-      if(Reset)
+      if(Reset || ResultValid)
         begin
           valid <=0;
           roundMant <=0;
