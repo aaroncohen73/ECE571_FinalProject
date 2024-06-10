@@ -24,6 +24,8 @@ logic [7:0] expDif;
 
 logic [4:0] Index;
 
+logic [7:0] holder;
+
 logic signA, signB, signOut, subCtrl, mantWrong, zeroResult, normRound, shiftRound, round, sticky, valid, doneRounding;
 
 xnor signControl(subCtrl, signA, signB);//
@@ -47,7 +49,7 @@ if(Reset)
     exp2 <= Op2.exponent;
     signA <= Op1.sign;
     signB <= Op2.sign;
-    ResultValid <= 0;
+//    ResultValid <= 0;
    end
    else
     begin
@@ -57,9 +59,10 @@ if(Reset)
     exp2 <= exp2;
     signA <= signA;
     signB <= signB; 
-    ResultValid <= doneRounding;
+    //ResultValid <= doneRounding;
     end
 end
+
 
 //Selects mantissa placement based on exponent ALU output. Doesn't account for exponents being the same
 n2to1Mux #(23) mantAmux(mantASel, mant1, mant2, smallMant);//
@@ -79,7 +82,7 @@ n2to1Mux #(1) signMux(mantBSel | (mantWrong && expNoDif), signA, signB, signOut)
 n2to1Mux #(25) roundMantMux(roundingMant, {1'b0,roundMant}, {normDir,signMant}, preMant);//
 
 //Determines which exponent (therefore operand) is larger. Also determines how far to shift the smaller mantissa to align binary placement.
-AddSub8Bit #(8) expALU(expDif, exp1, exp2, mantASel,expNoDif , , ,1'b1);//
+AddSub8Bit #(8) expALU(expDif, exp1, exp2, mantASel,expNoDif , , abc,1'b1);//
 
 //Never select the same mantissa twice
 assign mantBSel = ~mantASel;//
@@ -104,10 +107,10 @@ AddSub8Bit #(8) expInc(normExp, currExp, {7'b0,zeroResult}, , , , ,normDir);//
 nBitFFO #(32) findFirst ({7'b0,preMant}, zeroResult, Index);//
 
 //barrelshifter instantiation, shift left 24-index
-BarrelShifter #(32) normalizer({7'b0,preMant}, (Index-5'd24), 1'b0, {leftMant}, 1'b1);//
-
+BarrelShifter #(32) normalizer({7'b0,preMant}, (5'd23-Index), 1'b0, {holder,leftMant}, 1'b1);//
+//assign leftMant = preMant << (Index-5'd24);
 //pre mantissa right shift
-rightShift preMantShift(smallMant,signOut,expDif,mantA,shiftRound,sticky);
+rightShift preMantShift(smallMant,mantASel,expDif,mantA,shiftRound,sticky);
 
 //rounding logic
 FloatRounding  roundingLogic(normMant,currExp,shiftRound,sticky,Clock,roundMant,roundExp,valid,Reset);
@@ -115,13 +118,13 @@ FloatRounding  roundingLogic(normMant,currExp,shiftRound,sticky,Clock,roundMant,
 assign roundingMant = valid;
 assign roundingExp = valid;
 assign doneRounding = valid;
-
+assign ResultValid = valid;
 assign Result.sign = signOut;
 assign Result.exponent = roundExp;
 assign Result.mantissa = roundMant;
 
 //right shift by one
-assign rightMant = {preMant,normRound} >> 1;//
+assign rightMant = {preMant,normRound} >> 1'b1;//
 
 //either take the right shift or the left shifted mantissa
 n2to1Mux #(24) normDirMux(normDir, rightMant, leftMant, normMant);//
