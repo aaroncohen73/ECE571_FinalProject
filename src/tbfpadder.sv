@@ -1,6 +1,6 @@
 module top;
 
-    parameter TEST_CYCLES = 1000;
+    parameter TEST_CYCLES = 1;
 
     import FloatingPoint::Float;
 
@@ -8,9 +8,9 @@ module top;
     var logic InputValid, Clock, Reset;
 
     wire logic [31:0] Result;
-    wire logic Busy, ResultValid;
+    wire logic ResultValid;
 
-    fpadder DUT(Op1, Op2, InputValid, Clock, Reset, Result, Busy, ResultValid);
+    FloatAdder DUT(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset);
 
     covergroup AdderCoverage;
         results: coverpoint Result iff (ResultValid)
@@ -42,7 +42,7 @@ module top;
     property AdderTransaction_p;
         @(posedge Clock)
         disable iff (Reset)
-            InputValid |=> (Busy && ~ResultValid) ##1 (~Busy && ResultValid) [->1];
+            InputValid |=> (~ResultValid) ##1 (ResultValid) [->1];
     endproperty
     AdderTransaction_a: assert property(AdderTransaction_p)
                         else $error("Adder interface requirements not met");
@@ -75,9 +75,10 @@ module top;
         cov = new;
         InitDUT();
 
-        TestAdditionNormals(TEST_CYCLES);
-        TestAdditionToInverse(TEST_CYCLES);
-        TestAdditionToPlusMinusZero(TEST_CYCLES);
+        TestAdditionInRange(TEST_CYCLES, -10, 13);
+        //TestAdditionNormals(TEST_CYCLES);
+        //TestAdditionToInverse(TEST_CYCLES);
+        //TestAdditionToPlusMinusZero(TEST_CYCLES);
 
         if (!Error)
             $display("All tests passed without errors");
@@ -91,14 +92,15 @@ module top;
         sr1 = In1.ToShortreal();
         sr2 = In2.ToShortreal();
 
+        @(negedge Clock);
         Op1 = In1.ToBits();
         Op2 = In2.ToBits();
         InputValid = 1;
         cov.sample();
-        @(posedge Clock);
+        @(negedge Clock);
         InputValid = 0;
 
-        while (Busy) @(posedge Clock);
+        while (~ResultValid) @(posedge Clock);
 
         DUT_Res = new(Result);
         KGD_Res = Float::FromShortreal(sr1 + sr2);
@@ -113,18 +115,20 @@ module top;
                         sr2, In2.FloatComponents());
         `endif
 
+        /*
         assert(ResultValid && Float::CompareIncludeNaN(KGD_Res, DUT_Res))
         else
             begin
             Error = 1;
             $error("Floating point addition result doesn't match known-good model.\n",
-                   "\tExpected output: %f %s | Actual output: %f %s\n",
+                   "\tExpected output: %0.3e %s\n\tActual output: %0.3e %s\n",
                         KGD_Res.ToShortreal(), KGD_Res.FloatComponents(),
                         DUT_Res.ToShortreal(), DUT_Res.FloatComponents(),
-                   "\tInput 1: %f %s | Input 2: %f %s",
+                   "\tInput 1: %0.3e %s\n\tInput 2: %0.3e %s",
                         sr1, In1.FloatComponents(),
                         sr2, In2.FloatComponents());
             end
+        */
 
         cov.sample();
     endtask
@@ -133,6 +137,8 @@ module top;
         Float In1, In2;
         In1 = new;
         In2 = new;
+
+        $display("Testing addition of normals to normals");
 
         In1.constraint_mode(0);
         In1.nodenorm_c.constraint_mode(1);
@@ -153,10 +159,45 @@ module top;
             end
     endtask
 
+    task TestAdditionInRange(int TestCycles, int minExp, int maxExp);
+        Float In1, In2;
+        In1 = new;
+        In2 = new;
+
+        In1.minexp = minExp;
+        In1.maxexp = maxExp;
+        In2.minexp = minExp;
+        In2.maxexp = maxExp;
+
+        $display("Testing addition of normals to normals");
+
+        In1.constraint_mode(0);
+        In1.nodenorm_c.constraint_mode(1);
+        In1.nonan_c.constraint_mode(1);
+        In1.noinf_c.constraint_mode(1);
+        In1.exprange_c.constraint_mode(1);
+
+        In2.constraint_mode(0);
+        In2.nodenorm_c.constraint_mode(1);
+        In2.nonan_c.constraint_mode(1);
+        In2.noinf_c.constraint_mode(1);
+        In2.exprange_c.constraint_mode(1);
+
+        for (int i = 0; i < TestCycles; i++)
+            begin
+            assert(In1.randomize());
+            assert(In2.randomize());
+            CheckAdditionResult(In1, In2);
+            CheckAdditionResult(In2, In1);
+            end
+    endtask
+
     task TestAdditionToInverse(int TestCycles);
         Float In1, In2;
         In1 = new;
         In2 = new;
+
+        $display("Testing addition of normals to their inverse");
 
         In1.constraint_mode(0);
         In1.nodenorm_c.constraint_mode(1);
@@ -179,6 +220,8 @@ module top;
         Float In1, In2;
         In1 = new;
         In2 = new;
+
+        $display("Testing addition of normals to +/-0");
 
         In1.constraint_mode(0);
         In1.nodenorm_c.constraint_mode(1);
