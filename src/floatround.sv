@@ -17,7 +17,7 @@ output logic valid;
     begin
       if(Reset || ResultValid)
         begin
-          valid <=0;
+          valid <=1;
           roundMant <=0;
           roundExp <=0;
         end
