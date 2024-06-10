@@ -72,6 +72,8 @@ module FloatAdder(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset);
                 LargerExponentSign <= Op1.sign;
                 end
 
+            $strobe("-----------------------------------------------------------------");
+            $strobe("START ADDITION");
             $strobe("\tINPUTS:\n",
                     "\t\tInput 1: Sign=%1b, Exponent=%0d, Mantissa=%23b\n", Op1.sign, Op1.exponent, Op1.mantissa,
                     "\t\tInput 2: Sign=%1b, Exponent=%0d, Mantissa=%23b", Op2.sign, Op2.exponent, Op2.mantissa);
