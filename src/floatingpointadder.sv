@@ -111,7 +111,7 @@ nBitFFO #(32) findFirst ({7'b0,preMant}, zeroResult, Index);//
 BarrelShifter #(32) normalizer({7'b0,preMant}, (5'd23-Index), 1'b0, {holder,leftMant}, 1'b1);//
 //assign leftMant = preMant << (Index-5'd24);
 //pre mantissa right shift
-rightShift preMantShift(smallMant,mantASel,expDif,mantA,shiftRound,sticky);
+rightShift preMantShift(smallMant,mantASel,expDif,mantA,shiftRound,sticky,expNoDif);
 
 //rounding logic
 FloatRounding roundingLogic(normMant,currExp,shiftRound,sticky,Clock,roundMant,roundExp,valid,Reset,validInput,rounded,ResultValid,signOut,roundSign);
