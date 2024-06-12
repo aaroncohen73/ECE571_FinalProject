@@ -27,9 +27,11 @@ logic [4:0] Index;
 
 logic [7:0] holder;
 
-logic signA, signB, signOut, subCtrl, mantWrong, zeroResult, normRound, shiftRound, round, sticky, valid, validInput,rounded,roundSign,test;
+logic signA, signB, signOut, subCtrl, mantWrong, zeroResult, normRound, shiftRound, round, sticky, valid, validInput,rounded,roundSign,noLeadingZero;
 
 xnor signControl(subCtrl, signA, signB);//
+
+assign noLeadingZero = (|exp1) & (|exp2);
 
 always_ff @(posedge Clock)
 begin
@@ -97,7 +99,7 @@ always_comb begin //
 if (signA!=signB && expNoDif && mantWrong)
 	signMant = ~firstMant+1'b1;
 else
-	signMant = firstMant;
+  signMant = firstMant;
 end
 	
 //increment exponent during normalizing. If amount normalized by is 0, don't decrement
@@ -112,7 +114,7 @@ nBitFFO #(32) findFirst ({7'b0,preMant}, zeroResult, Index);//
 BarrelShifter #(32) normalizer({7'b0,preMant}, (5'd23-Index), 1'b0, {holder,leftMant}, 1'b1);//
 //assign leftMant = preMant << (Index-5'd24);
 //pre mantissa right shift
-rightShift preMantShift(smallMant,mantBSel,expDif,mantA,shiftRound,sticky,expNoDif,test);
+rightShift preMantShift(smallMant,mantBSel,expDif,mantA,shiftRound,sticky,expNoDif,noLeadingZero,~subCtrl);
 
 //rounding logic
 FloatRounding roundingLogic(normMant,currExp,shiftRound,sticky,Clock,roundMant,roundExp,valid,Reset,validInput,rounded,ResultValid,signOut,roundSign,expNoDif,mantNoDif,subCtrl);
