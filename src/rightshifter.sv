@@ -1,9 +1,9 @@
-module rightShift(mantValue,sign,index,shiftedMant,R,S,expNoDif);
+module rightShift(mantValue,sign,index,shiftedMant,R,S,expNoDif,test);
 parameter n = 23;
 parameter exp = 8;
 input logic [n-1:0] mantValue;
 input logic [exp-1:0] index;
-input logic sign,expNoDif;
+input logic sign,expNoDif,test;
 output logic [n-1:0] shiftedMant;
 output logic S;
 output logic R;
