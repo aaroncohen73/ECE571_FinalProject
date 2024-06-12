@@ -118,10 +118,18 @@ FloatRounding roundingLogic(normMant,currExp,shiftRound,sticky,Clock,roundMant,r
 
 assign roundingMant = rounded;
 assign roundingExp =rounded;
-assign ResultValid = valid;
+//assign ResultValid = valid;
 assign Result.sign = roundSign;
 assign Result.exponent = roundExp;
 assign Result.mantissa = roundMant;
+
+always_ff @(posedge Clock)
+begin
+  if (valid)
+    ResultValid <= '1;
+  else if(InputValid)
+    ResultValid <= '0;
+end
 
 //right shift by one
 assign rightMant = {preMant,normRound} >> 1'b1;//
