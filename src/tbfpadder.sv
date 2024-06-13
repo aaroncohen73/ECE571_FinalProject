@@ -1,7 +1,7 @@
 `define DEBUG
 module top;
 
-    parameter TEST_CYCLES = 1;
+    parameter TEST_CYCLES = 100;
 
     import FloatingPoint::Float;
 

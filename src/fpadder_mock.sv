@@ -2,6 +2,8 @@ module FloatAdder(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset);
 
     import floatingpoint::*;
 
+    parameter ExtraPrecisionBits = 2; // Round and sticky bit
+
     input float Op1, Op2;
     input logic InputValid;
     input logic Clock, Reset;
@@ -14,6 +16,8 @@ module FloatAdder(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset);
     int SmallerExponentMantissa, LargerExponentMantissa;
     int LargerExponentValue;
     int SmallerExponentSign, LargerExponentSign;
+
+    int Round, Sticky;
 
     int MantissaAdditionResult;
     int MantissaAdditionSign;
@@ -40,6 +44,9 @@ module FloatAdder(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset);
             SmallerExponentSign <= '0;
             LargerExponentSign <= '0;
 
+            Round <= '0;
+            Sticky <= '0;
+
             MantissaAdditionResult <= '0;
             MantissaAdditionSign <= '0;
 
@@ -58,18 +65,40 @@ module FloatAdder(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset);
             if (Op1.exponent < Op2.exponent)
                 begin
                 SmallerExponentMantissa <= (Op1.mantissa + 2**23) >> (Op2.exponent - Op1.exponent);
-                LargerExponentMantissa <= Op2.mantissa + 2**23;
+                LargerExponentMantissa <= (Op2.mantissa + 2**23);
                 LargerExponentValue <= Op2.exponent;
                 SmallerExponentSign <= Op1.sign;
                 LargerExponentSign <= Op2.sign;
+
+                if (Op2.exponent - Op1.exponent == 0)
+                    Round <= 0;
+                else
+                    Round <= Op1.mantissa[Op2.exponent - Op1.exponent - 1];
+
+                if (Op2.exponent - Op1.exponent <= 1)
+                    Sticky <= 0;
+                else
+                    Sticky <= (Op1.mantissa != (Op1.mantissa >> (Op2.exponent - Op1.exponent - 1) << (Op2.exponent - Op1.exponent - 1)));
                 end
             else
                 begin
                 SmallerExponentMantissa <= (Op2.mantissa + 2**23) >> (Op1.exponent - Op2.exponent);
-                LargerExponentMantissa <= Op1.mantissa + 2**23;
+                LargerExponentMantissa <= (Op1.mantissa + 2**23);
                 LargerExponentValue <= Op1.exponent;
                 SmallerExponentSign <= Op2.sign;
                 LargerExponentSign <= Op1.sign;
+
+                if (Op1.exponent - Op2.exponent == 0)
+                    Round <= 0;
+                else
+                    Round <= Op2.mantissa[Op1.exponent - Op2.exponent - 1];
+
+                $strobe("%32b",(Op2.mantissa << (31 - (Op1.exponent - Op2.exponent - 2))));
+
+                if (Op2.exponent - Op1.exponent <= 1)
+                    Sticky <= 0;
+                else
+                    Sticky <= (Op2.mantissa != (Op2.mantissa >> (Op1.exponent - Op2.exponent - 1) << (Op1.exponent - Op2.exponent - 1)));
                 end
 
             $strobe("-----------------------------------------------------------------");
@@ -125,14 +154,45 @@ module FloatAdder(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset);
                     break;
                     end
 
-            $strobe("\tSTEP 3: Non-normalized mantissa=%25b, exponent=%0d\n", MantissaAdditionResult[24:0], LargerExponentValue,
-                    "\t\tNormalized mantissa=%24b, exponent=%0d", SumNormalizationResult[23:0], SumNormalizationExponent);
+            $strobe("\tSTEP 3: Non-normalized mantissa=%25b, exponent=%0d\n", MantissaAdditionResult, LargerExponentValue,
+                    "\t\tNormalized mantissa=%24b, exponent=%0d", SumNormalizationResult, SumNormalizationExponent);
             @(posedge Clock);
 
             // STEP 4 (TODO) - Rounding
-            MantissaRoundingResult <= SumNormalizationResult;
+
+            // Rounding conditions
+            if (Round && Sticky)
+                begin
+                if (MantissaAdditionSign[0])
+                    MantissaRoundingResult <= SumNormalizationResult - 1;
+                else
+                    MantissaRoundingResult <= SumNormalizationResult + 1;
+                $strobe("\t\tRounding to nearest performed");
+                end
+            else if (SumNormalizationResult[0] && Round && ~Sticky)
+                begin
+                if (MantissaAdditionSign[0])
+                    MantissaRoundingResult <= SumNormalizationResult - 1;
+                else
+                    MantissaRoundingResult <= SumNormalizationResult + 1;
+                $strobe("\t\tRounding to even performed");
+                end
+            else
+                begin
+                MantissaRoundingResult <= SumNormalizationResult;
+                $strobe("\t\tRounding not performed");
+                end
+            $strobe("\tSTEP 4: Rounding mantissa = %23b, G = %1b, R = %1b, S = %1b", MantissaRoundingResult, SumNormalizationResult[0], Round, Sticky);
 
             @(posedge Clock);
+
+            // Re-normalize
+            if (MantissaRoundingResult[24])
+                begin
+                MantissaRoundingResult <= MantissaRoundingResult >> 1;
+                SumNormalizationExponent <= SumNormalizationExponent + 1;
+                $strobe("\t\tRe-normalized result");
+                end
 
             Result.exponent <= SumNormalizationExponent[7:0];
             Result.mantissa <= MantissaRoundingResult[22:0];
