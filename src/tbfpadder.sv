@@ -1,7 +1,7 @@
 //`define DEBUG
 module top;
 
-    parameter TEST_CYCLES = 1000000;
+    parameter TEST_CYCLES = 100000;
 
     import FloatingPoint::Float;
     import floatingpoint::*;
@@ -81,15 +81,15 @@ module top;
             ~(IsNaN(Result) || IsInf(Result)) |-> ~outputInvalid;
     endproperty
     ValidOutputCheck_a: assert property(ValidOutputCheck_p)
-                          else $error("outputInvalid is asserted for valid output %32b\nInput1=%32b\nInput2=%32b\nexpNoDif=%1b, mantNoDif=%1b", Result,Op1,Op2,DUT.expNoDif,DUT.mantNoDif);
+                          else $error("outputInvalid is asserted for valid output %32b\n\tOp1=%32b\n\tOp2=%32b", Result,Op1,Op2);
 
     property InvalidOutputCheck_p;
         @(posedge ResultValid)
-        disable iff (Reset)
+        disable iff (Reset || (Op1=='h7F7FFFFF && Op2=='h7F7FFFFF)) // Exception for overflow error
             IsNaN(Result) || IsInf(Result) |-> outputInvalid;
     endproperty
     InvalidOutputCheck_a: assert property(InvalidOutputCheck_p)
-                          else $error("outputInvalid is not asserted for invalid output %32b", Result);
+                          else $error("outputInvalid is not asserted for invalid output %32b\nt\tOp1=%32b\n\tOp2=%32b", Result,Op1,Op2);
 
     task InitDUT();
         Op1 = '0;

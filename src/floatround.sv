@@ -10,10 +10,11 @@ output logic valid,roundSign,outputInvalid;
 
 output logic rounded;
 
+
   always_ff @(posedge Clock)
     begin
       outputInvalid <= 0;
-      if((!expNoDif && !mantNoDif) && ((normExp == '1 && normMant != '0) || (normExp == '0 && normMant != '0)))
+      if((!expNoDif && !mantNoDif) && ((normExp == '1 && normMant != '0) || (normExp == '0 && normMant != '0) || (normExp == '1 && normMant == '0)))
         outputInvalid <= 1;
       if(Reset || ResultValid)
         begin
