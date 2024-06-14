@@ -11,6 +11,9 @@ module top;
     wire logic [31:0] Result;
     wire logic ResultValid;
 
+    int roundErrCount, otherErrCount;
+
+
     FloatAdder DUT(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset);
 
     covergroup AdderCoverage;
@@ -67,6 +70,11 @@ module top;
         forever #5 Clock = ~Clock;
         end
 
+    final
+        begin
+        $display("Rounding errors: %d, other errors: %d", roundErrCount, otherErrCount);
+        end
+
     int Error;
     AdderCoverage cov;
 
@@ -77,9 +85,21 @@ module top;
         InitDUT();
 
         TestAdditionInRange(TEST_CYCLES, -10, 13);
-        //TestAdditionNormals(TEST_CYCLES);
-        //TestAdditionToInverse(TEST_CYCLES);
-        //TestAdditionToPlusMinusZero(TEST_CYCLES);
+        TestAdditionNormals(TEST_CYCLES);
+        TestAdditionToInverse(TEST_CYCLES);
+        TestAdditionToPlusMinusZero(TEST_CYCLES);
+
+        //add smallest norm float to largest float
+        TestAdditionGeneric('h00800000, 'h7F7FFFFF);
+
+        //add smallest norm float to smallest norm float
+        TestAdditionGeneric('h00800000, 'h00800000);
+
+        //add largest float to largest float
+        TestAdditionGeneric('h7F7FFFFF, 'h7F7FFFFF);
+
+        //add a NaN to float (3.14)
+        TestAdditionGeneric('hFFC00001, 'h4048F5C3);
 
         if (!Error)
             $display("All tests passed without errors");
@@ -126,6 +146,11 @@ module top;
                    "\tInput 1: %0.3e %s\n\tInput 2: %0.3e %s",
                         sr1, In1.FloatComponents(),
                         sr2, In2.FloatComponents());
+
+            if ((In1.sign || In2.sign) && KGD_Res.exponent == DUT_Res.exponent && ((In1.mantissa-In2.mantissa <= -2) || (In1.mantissa-In2.mantissa >= 2)))
+	    	        roundErrCount++;
+	        else if (!(In1.sign || In2.sign) && KGD_Res.exponent == DUT_Res.exponent && ((In1.mantissa-In2.mantissa <= 2) || (In1.mantissa-In2.mantissa >= 2)))
+		            otherErrCount++;
             end
 
         cov.sample();
@@ -242,6 +267,26 @@ module top;
             CheckAdditionResult(In1, In2);
             CheckAdditionResult(In2, In1);
             end
+    endtask
+
+
+    //Task to test addition of two particular operands
+    task TestAdditionGeneric(int fpBits1, fpBits2);
+            Float In1, In2;
+            In1 = new;
+            In2 = new;
+
+            In1.sign = fpBits1[31];
+            In1.exponent = fpBits1[30:23];
+            In1.mantissa = fpBits1[22:0];
+
+            In2.sign = fpBits2[31];
+            In2.exponent = fpBits2[30:23];
+            In2.mantissa = fpBits2[22:0];
+
+            CheckAdditionResult(In1, In2);
+            CheckAdditionResult(In2, In1);
+
     endtask
 
 endmodule
