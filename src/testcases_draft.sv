@@ -48,13 +48,13 @@ task TestAdditionAllExp(int TestCycles);
         In2.nonan_c.constraint_mode(1);
         In2.noinf_c.constraint_mode(1);
 
-        for (int j = 1; j < 255; i++)
+        for (int j = 1; j < 255; j++)
             In1.exponent = j;
             for (int i = 0; i < TestCycles; i++)
                 begin
-                assert(In1.sign.randomize());
-                assert(In1.mantissa.randomize());
-                assert(In2.randomize());
+                        assert(In1.randomize(sign));
+                        assert(In1.randomize(mantissa));
+                        assert(In2.randomize());
                 
                 CheckAdditionResult(In1, In2);
                 CheckAdditionResult(In2, In1);
