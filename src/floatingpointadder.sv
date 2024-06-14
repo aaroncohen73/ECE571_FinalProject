@@ -1,12 +1,13 @@
-module FloatAdder(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset,isInf,isZero,isNaN);
+module FloatAdder(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset,isInf,isZero,isNaN,Op1Invalid,Op2Invalid);
 
 import floatingpoint::*;
+
 
 input  float Op1, Op2;
 output float Result;
 
 input  logic InputValid;
-output logic ResultValid,isInf,isZero,isNaN;
+output logic ResultValid,isInf,isZero,isNaN,Op1Invalid,Op2Invalid;
 
 input logic Clock, Reset;
 
@@ -141,5 +142,9 @@ n2to1Mux #(24) normDirMux(normDir  & subCtrl ,rightMant, leftMant, normMant);//
 
 //Pick the right Round bit
 n2to1Mux #(1) roundPicker(normDir&subCtrl,normRound, shiftRound, round);//
+
+CheckSpecial U1 (Op1,Op1Invalid);
+
+CheckSpecial U2 (Op2,Op2Invalid);
 
 endmodule
