@@ -14,12 +14,12 @@ logic [22:0] mant1, mant2, smallMant, mantA, mantB;
 
 logic [23:0] firstMant, normMant, signMant, leftMant, rightMant, roundMant;
 
-logic [24:0] preMant;
+logic [23:0] preMant;
 
 logic [7:0] exp1, exp2, preExp, currExp, normExp, roundExp;
 
 logic expSel, mantASel, mantBSel, signSel,roundingMant, roundingExp, incExp,
-normDir, expNoDif,mantNoDif;
+normDir, expNoDif,mantNoDif,oFlow;
 
 logic [7:0] expDif;
 
@@ -30,6 +30,8 @@ logic [7:0] holder;
 logic signA, signB, signOut, subCtrl, mantWrong, zeroResult, normRound, shiftRound, round, sticky, valid, validInput,rounded,roundSign,noLeadingZero;
 
 xnor signControl(subCtrl, signA, signB);//
+
+//or twosComp(comp, signA, signB);
 
 assign noLeadingZero = (|exp1) & (|exp2);
 
@@ -52,8 +54,6 @@ if(Reset)
     exp2 <= Op2.exponent;
     signA <= Op1.sign;
     signB <= Op2.sign;
-//    sticky <= 0; 
- //   shiftRound <= 0;
     validInput <= 1;
    end
    else
@@ -80,10 +80,10 @@ n2to1Mux #(8) preExpMux(mantASel, exp1, exp2, preExp);//
 n2to1Mux #(8) roundExpMux(roundingExp, roundExp, preExp, currExp);//
 
 //Selects the sign to passthrough based on exponent ALU results THEN mantissa ALU results. 
-n2to1Mux #(1) signMux(mantASel | (mantWrong && expNoDif), signA, signB, signOut);//
+n2to1Mux #(1) signMux(mantASel && ~(mantWrong && expNoDif), signA, signB, signOut);//
 
 //Selects which mantissa to send to the rounding circuit based on if we are currently rounding or not
-n2to1Mux #(25) roundMantMux(roundingMant, {1'b0,roundMant}, {normDir,signMant}, preMant);//
+n2to1Mux #(24) roundMantMux(roundingMant, roundMant, signMant, preMant);//
 
 //Determines which exponent (therefore operand) is larger. Also determines how far to shift the smaller mantissa to align binary placement.
 AddSub8Bit #(8) expALU(expDif, exp1, exp2, ,expNoDif , ,mantASel,1'b1);//
@@ -92,7 +92,7 @@ AddSub8Bit #(8) expALU(expDif, exp1, exp2, ,expNoDif , ,mantASel,1'b1);//
 assign mantBSel = ~mantASel;//
 
 //Determines the sum of the two mantissas. If exponent is the same, ordering may be incorrect. To account for this, use logic to decide if output needs 2's complement to restore proper sign
-AddSub8Bit #(24) mantALU(firstMant,{1'b1, mantB}, {expNoDif, mantA},mantWrong ,mantNoDif , , normDir, ~subCtrl);//
+AddSub8Bit #(24) mantALU(firstMant,{1'b1, mantB}, {expNoDif, mantA}, mantWrong,mantNoDif ,oFlow , normDir,~subCtrl );//
 
 //Ensure correct "sign" of mantissa result
 always_comb begin //
@@ -103,25 +103,24 @@ else
 end
 	
 //increment exponent during normalizing. If amount normalized by is 0, don't decrement
-AddSub8Bit #(8) expInc(normExp, currExp, {7'b0,zeroResult}, , , , ,normDir);//
+AddSub8Bit #(8) expInc(normExp, currExp, (normDir & subCtrl) ? 1'b1 : ({3'b0,(5'd23-Index)}),,,, ,~(normDir&subCtrl));//
 
 //DONE Make normalizer circuitry
 
 //output location of first one
-nBitFFO #(32) findFirst ({7'b0,preMant}, zeroResult, Index);//
+nBitFFO #(32) findFirst ({8'b0,preMant}, zeroResult, Index);//
 
 //barrelshifter instantiation, shift left 24-index
-BarrelShifter #(32) normalizer({7'b0,preMant}, (5'd23-Index), 1'b0, {holder,leftMant}, 1'b1);//
-//assign leftMant = preMant << (Index-5'd24);
+BarrelShifter #(32) normalizer({8'b0,preMant}, (5'd23-Index), 1'b0, {holder,leftMant}, 1'b1);//
+
 //pre mantissa right shift
 rightShift preMantShift(smallMant,mantBSel,expDif,mantA,shiftRound,sticky,expNoDif,noLeadingZero,~subCtrl);
 
 //rounding logic
-FloatRounding roundingLogic(normMant,currExp,shiftRound,sticky,Clock,roundMant,roundExp,valid,Reset,validInput,rounded,ResultValid,signOut,roundSign,expNoDif,mantNoDif,subCtrl);
+FloatRounding roundingLogic(normMant,normExp,round,sticky,Clock,roundMant,roundExp,valid,Reset,validInput,rounded,ResultValid,signOut,roundSign,expNoDif,mantNoDif,subCtrl);
 
 assign roundingMant = rounded;
 assign roundingExp =rounded;
-//assign ResultValid = valid;
 assign Result.sign = roundSign;
 assign Result.exponent = roundExp;
 assign Result.mantissa = roundMant;
@@ -135,12 +134,12 @@ begin
 end
 
 //right shift by one
-assign rightMant = {preMant,normRound} >> 1'b1;//
+assign {rightMant,normRound} = preMant >> rounded;//
 
 //either take the right shift or the left shifted mantissa
-n2to1Mux #(24) normDirMux(normDir, rightMant, leftMant, normMant);//
+n2to1Mux #(24) normDirMux(normDir  & subCtrl ,rightMant, leftMant, normMant);//
 
 //Pick the right Round bit
-n2to1Mux #(1) roundPicker(normDir, normRound, shiftRound, round);//
+n2to1Mux #(1) roundPicker(normDir&subCtrl,normRound, shiftRound, round);//
 
 endmodule

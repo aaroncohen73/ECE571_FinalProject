@@ -8,14 +8,16 @@ output logic [n-1:0] shiftedMant;
 output logic S;
 output logic R;
 logic [exp-1:0] shiftAmount;
+logic [n:0] compMant;
 int i;
 
     assign shiftAmount = (index^{8{sign}}) + sign;
-
 always_comb
   begin
-  //    shiftAmount = (index^{8{sign}}) + sign;
-  for(i = 0; i <shiftAmount; i++)
+  //compMant = comp ? {1'b1,~mantValue}+1'b1:{noLeadingZero,mantValue};
+  if(!expNoDif)
+  begin
+  for(i = 0; i <shiftAmount-1; i++)
   begin
     if(mantValue[i] == 1)
       begin
@@ -25,20 +27,25 @@ always_comb
     else
       S = 0;
   end
+  end
   if(expNoDif)
-  shiftedMant = mantValue;
-  else
-  {shiftedMant,R} = {noLeadingZero,mantValue} >> shiftAmount - 1'b1;
+  begin
+    shiftedMant = mantValue;
+    R = 0;
+    S = 0;
+  end
+  else 
+  {shiftedMant,R} = {~expNoDif&noLeadingZero,mantValue} >> shiftAmount - 1'b1;
   if(subCtrl)
   begin
-  if(shiftedMant[0] && R)
-    shiftedMant = shiftedMant +1'b1;
-  else if(R&&S)
-    shiftedMant  = shiftedMant + 1'b1;
-  else
-    shiftedMant = shiftedMant;
-  R = 0;
-  S = 0;
+    if(shiftedMant[0] & R)
+      shiftedMant = shiftedMant +1'b1;
+    else if(R&S)
+       shiftedMant  = shiftedMant + 1'b1;
+    else
+       shiftedMant = shiftedMant;
+     R = 0;
+     S = 0;
   end
   end
 endmodule

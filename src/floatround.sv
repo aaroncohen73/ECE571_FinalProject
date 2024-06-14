@@ -38,7 +38,7 @@ output logic rounded;
         rounded <= 0;
         valid <= 1;
         end
-     else  if (normMant[0] && R)
+     else if (normMant[0] && R)
         begin
         valid <= 0;
         roundMant <= normMant+1'b1; // Round up 
