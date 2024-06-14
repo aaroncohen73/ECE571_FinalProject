@@ -4,17 +4,19 @@ module top;
     parameter TEST_CYCLES = 100;
 
     import FloatingPoint::Float;
+    import floatingpoint::*;
 
     var logic [31:0] Op1, Op2;
     var logic InputValid, Clock, Reset;
 
     wire logic [31:0] Result;
     wire logic ResultValid;
+    wire logic outputInvalid, inputInvalid;
 
     int roundErrCount, otherErrCount;
 
 
-    FloatAdder DUT(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset);
+    FloatAdder DUT(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset, outputInvalid, inputInvalid);
 
     covergroup AdderCoverage;
         results: coverpoint Result iff (ResultValid)
@@ -50,6 +52,44 @@ module top;
     endproperty
     AdderTransaction_a: assert property(AdderTransaction_p)
                         else $error("Adder interface requirements not met");
+
+    property ValidInputCheck_p;
+        @(posedge Clock)
+        disable iff (Reset)
+            ~inputInvalid |->
+                ~(IsNaN(Op1) || IsInf(Op1) || IsDenorm(Op1) ||
+                IsNaN(Op2) || IsInf(Op2) || IsDenorm(Op2));
+    endproperty
+    ValidInputCheck_a: assert property(ValidInputCheck_p)
+                       else $error("inputInvalid is asserted for valid inputs\n\tOp1 = %32b\n\tOp2 = %32b",
+                                   $sampled(Op1), $sampled(Op2));
+
+    property InvalidInputCheck_p;
+        @(posedge Clock)
+        disable iff (Reset)
+            inputInvalid |->
+                IsNaN(Op1) || IsInf(Op1) || IsDenorm(Op1) ||
+                IsNaN(Op2) || IsInf(Op2) || IsDenorm(Op2);
+    endproperty
+    InvalidInputCheck_a: assert property(InvalidInputCheck_p)
+                         else $error("inputInvalid is not asserted for invalid inputs\n\tOp1 = %32b\n\tOp2 = %32b",
+                                     $sampled(Op1), $sampled(Op2));
+
+    property ValidOutputCheck_p;
+        @(posedge ResultValid)
+        disable iff (Reset)
+            ~outputInvalid |-> ~(IsNaN(Result) || IsInf(Result));
+    endproperty
+    ValidOutputCheck_a: assert property(ValidOutputCheck_p)
+                          else $error("outputInvalid is asserted for valid output %32b", $sampled(Result));
+
+    property InvalidOutputCheck_p;
+        @(posedge ResultValid)
+        disable iff (Reset)
+            outputInvalid |-> IsNaN(Result) || IsInf(Result);
+    endproperty
+    InvalidOutputCheck_a: assert property(InvalidOutputCheck_p)
+                          else $error("outputInvalid is not asserted for invalid output %32b", $sampled(Result));
 
     task InitDUT();
         Op1 = '0;
