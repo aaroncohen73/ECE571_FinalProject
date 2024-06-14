@@ -1,4 +1,4 @@
-module FloatAdder(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset);
+module FloatAdder(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset,isInf,isZero,isNaN);
 
 import floatingpoint::*;
 
@@ -6,7 +6,7 @@ input  float Op1, Op2;
 output float Result;
 
 input  logic InputValid;
-output logic ResultValid;
+output logic ResultValid,isInf,isZero,isNaN;
 
 input logic Clock, Reset;
 
@@ -117,7 +117,7 @@ BarrelShifter #(32) normalizer({8'b0,preMant}, (5'd23-Index), 1'b0, {holder,left
 rightShift preMantShift(smallMant,mantBSel,expDif,mantA,shiftRound,sticky,expNoDif,noLeadingZero,~subCtrl);
 
 //rounding logic
-FloatRounding roundingLogic(normMant,normExp,round,sticky,Clock,roundMant,roundExp,valid,Reset,validInput,rounded,ResultValid,signOut,roundSign,expNoDif,mantNoDif,subCtrl);
+FloatRounding roundingLogic(normMant,normExp,round,sticky,Clock,roundMant,roundExp,valid,Reset,validInput,rounded,ResultValid,signOut,roundSign,expNoDif,mantNoDif,subCtrl,isInf,isNaN,isZero);
 
 assign roundingMant = rounded;
 assign roundingExp =rounded;
