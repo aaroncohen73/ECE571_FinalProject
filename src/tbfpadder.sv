@@ -1,7 +1,7 @@
-`define DEBUG
+//`define DEBUG
 module top;
 
-    parameter TEST_CYCLES = 100;
+    parameter TEST_CYCLES = 1000000;
 
     import FloatingPoint::Float;
     import floatingpoint::*;
@@ -78,18 +78,18 @@ module top;
     property ValidOutputCheck_p;
         @(posedge ResultValid)
         disable iff (Reset)
-            ~outputInvalid |-> ~(IsNaN(Result) || IsInf(Result));
+            ~(IsNaN(Result) || IsInf(Result)) |-> ~outputInvalid;
     endproperty
     ValidOutputCheck_a: assert property(ValidOutputCheck_p)
-                          else $error("outputInvalid is asserted for valid output %32b", $sampled(Result));
+                          else $error("outputInvalid is asserted for valid output %32b\nInput1=%32b\nInput2=%32b\nexpNoDif=%1b, mantNoDif=%1b", Result,Op1,Op2,DUT.expNoDif,DUT.mantNoDif);
 
     property InvalidOutputCheck_p;
         @(posedge ResultValid)
         disable iff (Reset)
-            outputInvalid |-> IsNaN(Result) || IsInf(Result);
+            IsNaN(Result) || IsInf(Result) |-> outputInvalid;
     endproperty
     InvalidOutputCheck_a: assert property(InvalidOutputCheck_p)
-                          else $error("outputInvalid is not asserted for invalid output %32b", $sampled(Result));
+                          else $error("outputInvalid is not asserted for invalid output %32b", Result);
 
     task InitDUT();
         Op1 = '0;
@@ -179,18 +179,22 @@ module top;
         else
             begin
             Error = 1;
-            $error("Floating point addition result doesn't match known-good model.\n",
-                   "\tExpected output: %0.3e %s\n\tActual output: %0.3e %s\n",
-                        KGD_Res.ToShortreal(), KGD_Res.FloatComponents(),
-                        DUT_Res.ToShortreal(), DUT_Res.FloatComponents(),
-                   "\tInput 1: %0.3e %s\n\tInput 2: %0.3e %s",
-                        sr1, In1.FloatComponents(),
-                        sr2, In2.FloatComponents());
 
-            if ((In1.sign || In2.sign) && KGD_Res.exponent == DUT_Res.exponent && ((In1.mantissa-In2.mantissa <= -2) || (In1.mantissa-In2.mantissa >= 2)))
+            if (KGD_Res.exponent == DUT_Res.exponent && ((In1.mantissa-In2.mantissa <= -2) || (In1.mantissa-In2.mantissa >= 2)))
+            begin
 	    	        roundErrCount++;
-	        else if (!(In1.sign || In2.sign) && KGD_Res.exponent == DUT_Res.exponent && ((In1.mantissa-In2.mantissa <= 2) || (In1.mantissa-In2.mantissa >= 2)))
+            end
+	        else if (KGD_Res.exponent == DUT_Res.exponent && ((In1.mantissa-In2.mantissa <= 2) || (In1.mantissa-In2.mantissa >= 2)))
+                begin
 		            otherErrCount++;
+                    $error("Floating point addition result doesn't match known-good model.\n",
+                           "\tExpected output: %0.3e %s\n\tActual output: %0.3e %s\n",
+                                KGD_Res.ToShortreal(), KGD_Res.FloatComponents(),
+                                DUT_Res.ToShortreal(), DUT_Res.FloatComponents(),
+                           "\tInput 1: %0.3e %s\n\tInput 2: %0.3e %s",
+                                sr1, In1.FloatComponents(),
+                                sr2, In2.FloatComponents());
+                end
             end
 
         cov.sample();

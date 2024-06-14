@@ -47,7 +47,7 @@ package FloatingPoint;
         endfunction
 
         function string FloatComponents();
-            return $sformatf("(Sign: %1b, Exponent: %8b, Mantissa: %23b)", sign, exponent, mantissa);
+            return $sformatf("(Sign: %1b, Exponent: %8b, Mantissa: \t%23b)", sign, exponent, mantissa);
         endfunction
 
         function shortreal ToShortreal();
