@@ -1,0 +1,4 @@
+In order to build and simulate our project simply run make.
+The necessary commands to compile and run are in the Makefile.
+Use the same directory structure as the github repository with 
+Makefile and src/ in the same directory.
