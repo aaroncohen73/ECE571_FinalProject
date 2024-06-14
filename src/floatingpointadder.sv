@@ -1,13 +1,12 @@
-module FloatAdder(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset,isInf,isZero,isNaN,Op1Invalid,Op2Invalid);
+module FloatAdder(Op1, Op2, InputValid, Result, ResultValid, Clock, Reset,outputInvalid,inputInvalid);
 
 import floatingpoint::*;
-
 
 input  float Op1, Op2;
 output float Result;
 
 input  logic InputValid;
-output logic ResultValid,isInf,isZero,isNaN,Op1Invalid,Op2Invalid;
+output logic ResultValid,outputInvalid,inputInvalid;
 
 input logic Clock, Reset;
 
@@ -32,7 +31,6 @@ logic signA, signB, signOut, subCtrl, mantWrong, zeroResult, normRound, shiftRou
 
 xnor signControl(subCtrl, signA, signB);//
 
-//or twosComp(comp, signA, signB);
 
 assign noLeadingZero = (|exp1) & (|exp2);
 
@@ -118,7 +116,7 @@ BarrelShifter #(32) normalizer({8'b0,preMant}, (5'd23-Index), 1'b0, {holder,left
 rightShift preMantShift(smallMant,mantBSel,expDif,mantA,shiftRound,sticky,expNoDif,noLeadingZero,~subCtrl);
 
 //rounding logic
-FloatRounding roundingLogic(normMant,normExp,round,sticky,Clock,roundMant,roundExp,valid,Reset,validInput,rounded,ResultValid,signOut,roundSign,expNoDif,mantNoDif,subCtrl,isInf,isNaN,isZero);
+FloatRounding roundingLogic(normMant,normExp,round,sticky,Clock,roundMant,roundExp,valid,Reset,validInput,rounded,ResultValid,signOut,roundSign,expNoDif,mantNoDif,subCtrl,outputInvalid);
 
 assign roundingMant = rounded;
 assign roundingExp =rounded;
@@ -146,5 +144,7 @@ n2to1Mux #(1) roundPicker(normDir&subCtrl,normRound, shiftRound, round);//
 CheckSpecial U1 (Op1,Op1Invalid);
 
 CheckSpecial U2 (Op2,Op2Invalid);
+
+assign inputInvalid = Op1Invalid | Op2Invalid;
 
 endmodule

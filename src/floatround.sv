@@ -1,28 +1,20 @@
-module
-FloatRounding(normMant,normExp,R,S,Clock,roundMant,roundExp,valid,Reset,validInput,rounded,ResultValid,signOut,roundSign,expNoDif,mantNoDif,subCtrl,isInf,isNaN,isZero);
+module FloatRounding(normMant,normExp,R,S,Clock,roundMant,roundExp,valid,Reset,validInput,rounded,ResultValid,signOut,roundSign,expNoDif,mantNoDif,subCtrl,outputInvalid);
 parameter n = 24;
 parameter exp = 8;
 input logic [n-1:0] normMant;
 input logic [exp-1:0] normExp; 
-input logic
-R,S,Reset,Clock,validInput,ResultValid,signOut,expNoDif,mantNoDif,subCtrl;
+input logic R,S,Reset,Clock,validInput,ResultValid,signOut,expNoDif,mantNoDif,subCtrl;
 output logic [n-1:0] roundMant;
 output logic [exp-1:0]  roundExp;
-output logic valid,roundSign,isInf,isZero,isNaN;
+output logic valid,roundSign,outputInvalid;
 
 output logic rounded;
 
   always_ff @(posedge Clock)
     begin
-      isInf <= 0;
-      isNaN <= 0;
-      isZero <= 0;
-      if(normExp == '1 && normMant == '0)
-        isInf <= 1;
-      else if(normExp == '1 && normMant != '0)
-        isNaN <= 1;
-      else if(normExp == '0 && normMant == '0)
-        isZero <= 1;
+      outputInvalid <= 0;
+      if(normExp == '1)
+        outputInvalid <= 1;
       if(Reset || ResultValid)
         begin
           valid <=0;
