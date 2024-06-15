@@ -1,0 +1,13 @@
+    • Adding integers to integers
+    • Adding integers to nonintegers
+    • Adding nonintegers to nonintegers
+    • Adding a number to its additive inverse
+    • Adding a number to its additive inverse +/- epsilon (smallest magnitude increment/decrement)
+    • Adding a number to +/-0
+    • Adding a number to +/-Inf
+    • Adding a number to a NaN
+    • Adding +/-Inf to a NaN
+    • Adding a number to a number with magnitude of exponent difference > 23
+    • Adding the smallest magnitude number to itself
+    • Adding the largest magnitude number to itself
+    • All the other test cases but do them again reversing the order of the operands

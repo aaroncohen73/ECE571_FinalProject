@@ -1,0 +1,186 @@
+QuestaSim-64 vcover 2021.3_1 Coverage Utility 2021.08 Aug 15 2021
+Start time: 14:28:17 on Jun 14,2024
+vcover report -verbose covrpt 
+Coverage Report by instance with details
+
+=================================================================================
+=== Instance: /top
+=== Design Unit: work.top
+=================================================================================
+
+Assertion Coverage:
+    Assertions                      12        11         1    91.66%
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Name                 Assertion   Design     Design     Lang File(Line)                Enable    Failure      Pass  FPSA   Failure Pass    Failure EOS  Formal       Formal
+                     Type        Unit       UnitType                                            Count        Count Action Log     Log     Limit   Note Status       Radius
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/top/AdderTransaction_a
+                     Concurrent  top        Verilog    SVA  src/tbfpadder.sv(53)        on            0          1 CCCC   -       -     unlimited off                     
+/top/ValidInputCheck_a
+                     Concurrent  top        Verilog    SVA  src/tbfpadder.sv(63)        on            0          1 CCCC   -       -     unlimited off                     
+/top/InvalidInputCheck_a
+                     Concurrent  top        Verilog    SVA  src/tbfpadder.sv(74)        on            0          1 CCCC   -       -     unlimited off                     
+/top/ValidOutputCheck_a
+                     Concurrent  top        Verilog    SVA  src/tbfpadder.sv(83)        on            0          1 CCCC   -       -     unlimited off                     
+/top/InvalidOutputCheck_a
+                     Concurrent  top        Verilog    SVA  src/tbfpadder.sv(91)        on            0          1 CCCC   -       -     unlimited off                     
+/top/CheckAdditionResult/immed__178
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(178)       on         8730          1 CCCC   -       -     unlimited off                     
+/top/TestAdditionNormals/#anonblk#31584#220#4#/#ublk#31584#221/immed__223
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(223)       on            0          1 CCCC   -       -     unlimited off                     
+/top/TestAdditionNormals/#anonblk#31584#220#4#/#ublk#31584#221/immed__222
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(222)       on            0          1 CCCC   -       -     unlimited off                     
+/top/TestAdditionInRange/#anonblk#31584#253#4#/#ublk#31584#254/immed__256
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(256)       on            0          1 CCCC   -       -     unlimited off                     
+/top/TestAdditionInRange/#anonblk#31584#253#4#/#ublk#31584#254/immed__255
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(255)       on            0          1 CCCC   -       -     unlimited off                     
+/top/TestAdditionToInverse/#anonblk#31584#274#4#/#ublk#31584#275/immed__276
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(276)       on            0          1 CCCC   -       -     unlimited off                     
+/top/TestAdditionToPlusMinusZero/#anonblk#31584#301#4#/#ublk#31584#302/immed__303
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(303)       on            0          1 CCCC   -       -     unlimited off                     
+
+Covergroup Coverage:
+    Covergroups                      1        na        na    66.66%
+        Coverpoints/Crosses          3        na        na        na
+            Covergroup Bins         15        10         5    66.66%
+----------------------------------------------------------------------------------------------------------
+Covergroup                                             Metric       Goal       Bins    Status               
+                                                                                                         
+----------------------------------------------------------------------------------------------------------
+ TYPE /top/AdderCoverage                               66.66%        100          -    Uncovered            
+    covered/total bins:                                    10         15          -                      
+    missing/total bins:                                     5         15          -                      
+    % Hit:                                             66.66%        100          -                      
+    Coverpoint results                                 80.00%        100          -    Uncovered            
+        covered/total bins:                                 4          5          -                      
+        missing/total bins:                                 1          5          -                      
+        % Hit:                                         80.00%        100          -                      
+    Coverpoint addend1                                 60.00%        100          -    Uncovered            
+        covered/total bins:                                 3          5          -                      
+        missing/total bins:                                 2          5          -                      
+        % Hit:                                         60.00%        100          -                      
+    Coverpoint addend2                                 60.00%        100          -    Uncovered            
+        covered/total bins:                                 3          5          -                      
+        missing/total bins:                                 2          5          -                      
+        % Hit:                                         60.00%        100          -                      
+ Covergroup instance \/top/cov                         66.66%        100          -    Uncovered            
+    covered/total bins:                                    10         15          -                      
+    missing/total bins:                                     5         15          -                      
+    % Hit:                                             66.66%        100          -                      
+    Coverpoint results                                 80.00%        100          -    Uncovered            
+        covered/total bins:                                 4          5          -                      
+        missing/total bins:                                 1          5          -                      
+        % Hit:                                         80.00%        100          -                      
+        bin zero                                      1200009          1          -    Covered              
+        bin inf                                             0          1          -    ZERO                 
+        bin nan                                            10          1          -    Covered              
+        bin norm                                       799994          1          -    Covered              
+        bin denorm                                          2          1          -    Covered              
+    Coverpoint addend1                                 60.00%        100          -    Uncovered            
+        covered/total bins:                                 3          5          -                      
+        missing/total bins:                                 2          5          -                      
+        % Hit:                                         60.00%        100          -                      
+        bin zero                                       200000          1          -    Covered              
+        bin inf                                             0          1          -    ZERO                 
+        bin nan                                             1          1          -    Covered              
+        bin norm                                       800007          1          -    Covered              
+        bin denorm                                          0          1          -    ZERO                 
+    Coverpoint addend2                                 60.00%        100          -    Uncovered            
+        covered/total bins:                                 3          5          -                      
+        missing/total bins:                                 2          5          -                      
+        % Hit:                                         60.00%        100          -                      
+        bin zero                                       200000          1          -    Covered              
+        bin inf                                             0          1          -    ZERO                 
+        bin nan                                             1          1          -    Covered              
+        bin norm                                       800007          1          -    Covered              
+        bin denorm                                          0          1          -    ZERO                 
+
+COVERGROUP COVERAGE:
+----------------------------------------------------------------------------------------------------------
+Covergroup                                             Metric       Goal       Bins    Status               
+                                                                                                         
+----------------------------------------------------------------------------------------------------------
+ TYPE /top/AdderCoverage                               66.66%        100          -    Uncovered            
+    covered/total bins:                                    10         15          -                      
+    missing/total bins:                                     5         15          -                      
+    % Hit:                                             66.66%        100          -                      
+    Coverpoint results                                 80.00%        100          -    Uncovered            
+        covered/total bins:                                 4          5          -                      
+        missing/total bins:                                 1          5          -                      
+        % Hit:                                         80.00%        100          -                      
+    Coverpoint addend1                                 60.00%        100          -    Uncovered            
+        covered/total bins:                                 3          5          -                      
+        missing/total bins:                                 2          5          -                      
+        % Hit:                                         60.00%        100          -                      
+    Coverpoint addend2                                 60.00%        100          -    Uncovered            
+        covered/total bins:                                 3          5          -                      
+        missing/total bins:                                 2          5          -                      
+        % Hit:                                         60.00%        100          -                      
+ Covergroup instance \/top/cov                         66.66%        100          -    Uncovered            
+    covered/total bins:                                    10         15          -                      
+    missing/total bins:                                     5         15          -                      
+    % Hit:                                             66.66%        100          -                      
+    Coverpoint results                                 80.00%        100          -    Uncovered            
+        covered/total bins:                                 4          5          -                      
+        missing/total bins:                                 1          5          -                      
+        % Hit:                                         80.00%        100          -                      
+        bin zero                                      1200009          1          -    Covered              
+        bin inf                                             0          1          -    ZERO                 
+        bin nan                                            10          1          -    Covered              
+        bin norm                                       799994          1          -    Covered              
+        bin denorm                                          2          1          -    Covered              
+    Coverpoint addend1                                 60.00%        100          -    Uncovered            
+        covered/total bins:                                 3          5          -                      
+        missing/total bins:                                 2          5          -                      
+        % Hit:                                         60.00%        100          -                      
+        bin zero                                       200000          1          -    Covered              
+        bin inf                                             0          1          -    ZERO                 
+        bin nan                                             1          1          -    Covered              
+        bin norm                                       800007          1          -    Covered              
+        bin denorm                                          0          1          -    ZERO                 
+    Coverpoint addend2                                 60.00%        100          -    Uncovered            
+        covered/total bins:                                 3          5          -                      
+        missing/total bins:                                 2          5          -                      
+        % Hit:                                         60.00%        100          -                      
+        bin zero                                       200000          1          -    Covered              
+        bin inf                                             0          1          -    ZERO                 
+        bin nan                                             1          1          -    Covered              
+        bin norm                                       800007          1          -    Covered              
+        bin denorm                                          0          1          -    ZERO                 
+
+TOTAL COVERGROUP COVERAGE: 66.66%  COVERGROUP TYPES: 1
+
+ASSERTION RESULTS:
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+Name                 Assertion   Design     Design     Lang File(Line)                Enable    Failure      Pass  FPSA   Failure Pass    Failure EOS  Formal       Formal
+                     Type        Unit       UnitType                                            Count        Count Action Log     Log     Limit   Note Status       Radius
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+/top/AdderTransaction_a
+                     Concurrent  top        Verilog    SVA  src/tbfpadder.sv(53)        on            0          1 CCCC   -       -     unlimited off                     
+/top/ValidInputCheck_a
+                     Concurrent  top        Verilog    SVA  src/tbfpadder.sv(63)        on            0          1 CCCC   -       -     unlimited off                     
+/top/InvalidInputCheck_a
+                     Concurrent  top        Verilog    SVA  src/tbfpadder.sv(74)        on            0          1 CCCC   -       -     unlimited off                     
+/top/ValidOutputCheck_a
+                     Concurrent  top        Verilog    SVA  src/tbfpadder.sv(83)        on            0          1 CCCC   -       -     unlimited off                     
+/top/InvalidOutputCheck_a
+                     Concurrent  top        Verilog    SVA  src/tbfpadder.sv(91)        on            0          1 CCCC   -       -     unlimited off                     
+/top/CheckAdditionResult/immed__178
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(178)       on         8730          1 CCCC   -       -     unlimited off                     
+/top/TestAdditionNormals/#anonblk#31584#220#4#/#ublk#31584#221/immed__223
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(223)       on            0          1 CCCC   -       -     unlimited off                     
+/top/TestAdditionNormals/#anonblk#31584#220#4#/#ublk#31584#221/immed__222
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(222)       on            0          1 CCCC   -       -     unlimited off                     
+/top/TestAdditionInRange/#anonblk#31584#253#4#/#ublk#31584#254/immed__256
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(256)       on            0          1 CCCC   -       -     unlimited off                     
+/top/TestAdditionInRange/#anonblk#31584#253#4#/#ublk#31584#254/immed__255
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(255)       on            0          1 CCCC   -       -     unlimited off                     
+/top/TestAdditionToInverse/#anonblk#31584#274#4#/#ublk#31584#275/immed__276
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(276)       on            0          1 CCCC   -       -     unlimited off                     
+/top/TestAdditionToPlusMinusZero/#anonblk#31584#301#4#/#ublk#31584#302/immed__303
+                     Immediate   top        Verilog    SVA  src/tbfpadder.sv(303)       on            0          1 CCCC   -       -     unlimited off                     
+
+Total Coverage By Instance (filtered view): 79.16%
+
+End time: 14:28:17 on Jun 14,2024, Elapsed time: 0:00:00
+Errors: 0, Warnings: 0
