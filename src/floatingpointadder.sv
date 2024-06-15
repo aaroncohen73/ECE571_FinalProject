@@ -66,6 +66,38 @@ if(Reset)
     end
 end
 
+`ifdef DEBUG_ADDER
+    always @(posedge InputValid)
+    begin
+            $display("-----------------------------------------------------------------");
+            $display("START ADDITION");
+            @(posedge Clock);
+            $strobe("\tINPUTS:\n",
+                            "\t\tInput 1: Sign=%1b, Exponent=%0d, Mantissa=%23b\n", signA, exp1, mant1,
+                            "\t\tInput 2: Sign=%1b, Exponent=%0d, Mantissa=%23b", signB, exp2, mant2);
+            $strobe("\tSTEP 1: Op1.exponent=%0d, Op2.exponent=%0d\n", Op1.exponent, Op2.exponent,
+                            "\t\tLarger exponent (mantASel)=%0d, Difference (expDif)=%0d", mantASel ? Op1.exponent : Op2.exponent, expDif);
+            $strobe("\t\tpreMantShift.shiftAmount = %0d",preMantShift.shiftAmount);
+            $strobe("\tSTEP 2: Operand 1 sign (signA)=%1b, prepended mantissa ({expNoDif,mantA})=%24b\n", signA, {expNoDif, mantA},
+                            "\t\tOperand 2 sign (signB)=%1b, prepended+shifted mantissa ({1'b1,mantB})=%24b\n", signB, {1'b1, mantB},
+                            "\t\tResult sign (signOut)=%1b, mantissa (signMant)=%24b", signOut, signMant);
+            $strobe("\t\tsmallMant = %23b", smallMant);
+
+            do
+                        begin
+                                    @(posedge Clock);
+                                    $strobe("\tRounding block output (roundingMant)=%1b",roundingMant);
+                                    $strobe("\tSTEP 3: Non-normalized mantissa (preMant)=%25b, exponent (preExp)=%0d\n", preMant, preExp,
+                                                        "\t\tNormalized mantissa (normMant)=%24b, exponent (normExp)=%0d\n", normMant, normExp,
+                                                        "\t\tFFO Result (Index)=%0d",Index);
+                                    $strobe("\tSTEP 4: Rounding block input: mantissa (normMant)=%24b, exponent (currExp)=%0d\n", normMant, currExp,
+                                                        "\t\tRounding block output: mantissa (roundMant)=%24b, exponent (roundExp)=%0d", roundMant, roundExp);
+                                    end
+            while (~ResultValid);
+            $strobe("\tOUTPUT: Sign=%1b, Exponent=%0d, Mantissa=%23b", Result.sign, Result.exponent, Result.mantissa);
+    end
+`endif
+
 
 //Selects mantissa placement based on exponent ALU output. Doesn't account for exponents being the same
 n2to1Mux #(23) mantAmux(mantBSel, mant1, mant2, smallMant);//
